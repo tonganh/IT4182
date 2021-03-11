@@ -1,0 +1,4 @@
+Program Example1; (* Example 1 *)
+Begin
+  ABC := 10;
+End. (* Example 1 *)

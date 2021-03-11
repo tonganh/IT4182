@@ -17,7 +17,7 @@ extern int colNo;
 extern int currentChar;
 int i = 0;
 extern CharCode charCodes[];
-int maxNumberDigit = 10;
+int getLparAndTimes = 0;
 /***************************************************************/
 
 void skipBlank()
@@ -32,36 +32,48 @@ void skipBlank()
 void skipComment()
 {
   int checkEndOfComment = 0;
+  int stepInit = 1;
+  int getLPAR = 0;
+  int getCharRPAR = 0;
+  int getTimes = 0;
+  int getRparTimes = 0;
   // checkEndOfComment = 1- > char now get: *, char =2: ) => finish skip comment
   // Go to end of comment, have model: *)
-  while ((currentChar != EOF) && (checkEndOfComment < 2))
+  while ((currentChar != EOF) && (getRparTimes != getLparAndTimes))
   {
     switch (charCodes[currentChar])
     {
+    case CHAR_LPAR:
+    {
+      getLPAR = 1;
+    }
     case CHAR_TIMES:
     {
-      checkEndOfComment++;
+      if (getLPAR == 1)
+      {
+        // printf("debug LPAR\n");
+        getLparAndTimes++;
+        getLPAR = 0;
+      }
+      getTimes = 1;
       break;
     }
     case CHAR_RPAR:
     {
-      // if we had '*', now when get '(' => ok we have all conditions for an comment
-      if (checkEndOfComment == 1)
+      if (getTimes == 1)
       {
-        checkEndOfComment = 2;
+        // printf("123\n");
+        getRparTimes++;
+        // printf("%d\n", getRparTimes);
       }
-      else
-      {
-        checkEndOfComment = 0;
-      }
-      break;
     }
     default:
-      checkEndOfComment = 0;
+      getLPAR = 0;
+      getTimes = 0;
     }
     readChar();
   }
-  if (checkEndOfComment != 2)
+  if (getRparTimes != getLparAndTimes)
   {
     error(ERR_ENDOFCOMMENT, lineNo, colNo);
   }
@@ -97,6 +109,7 @@ Token *readIdentKeyword(void)
   if (i > MAX_IDENT_LEN)
   {
     error(ERR_IDENTTOOLONG, tokenReadIdentKeyword->lineNo, tokenReadIdentKeyword->colNo);
+    return tokenReadIdentKeyword;
   }
   TokenType valueHere = checkKeyword(tokenReadIdentKeyword->string);
   if (valueHere != TK_NONE)
@@ -122,50 +135,17 @@ Token *readNumber(void)
     readChar();
     convertToNumber = currentChar;
   }
-  if (i > maxNumberDigit)
-  {
-    error(ERR_INVALIDNUMBER, lineNo, colNo);
-  }
-  else
-  {
-    return tokenNumber;
-  }
+  return tokenNumber;
 }
 
-Token *readConstChar(void)
-{
-  Token *token = makeToken(TK_CHAR, lineNo, colNo);
-  readChar();
-  if (currentChar == EOF)
-  {
-    token->tokenType = TK_NONE;
-    error(ERR_INVALIDCHARCONSTANT, lineNo, colNo);
-    return token;
-  }
-  // get const char
-  token->string[0] = currentChar;
-  token->value = currentChar;
+// Token *readConstChar(void)
+// {
+//   if ((currentChar != EOF) &&)
+//   {
+//     /* code */
+//   }
 
-  readChar();
-  if (currentChar == EOF)
-  {
-    token->tokenType = TK_NONE;
-    error(ERR_INVALIDCHARCONSTANT, lineNo, colNo);
-    return token;
-  }
-  if (charCodes[currentChar] == CHAR_SINGLEQUOTE)
-  {
-    token->tokenType = KW_CONST;
-    readChar();
-    return token;
-  }
-  else
-  {
-    token->tokenType = TK_NONE;
-    error(ERR_INVALIDCHARCONSTANT, token->lineNo, token->colNo);
-    return token;
-  }
-}
+// }
 
 Token *getToken(void)
 {
@@ -201,6 +181,7 @@ Token *getToken(void)
     {
     case CHAR_TIMES:
       readChar();
+      getLparAndTimes = 1;
       skipComment();
       // AFter skip comment, we again get token
       return getToken();
@@ -306,16 +287,7 @@ Token *getToken(void)
   case CHAR_TIMES:
   {
     readChar();
-    ln = lineNo;
-    cn = colNo;
-    if ((charCodes[currentChar] == CHAR_RPAR) && (currentChar != EOF))
-    {
-      error(ERR_ENDOFCOMMENT, ln, cn);
-    }
-    else
-    {
-      return makeToken(SB_TIMES, lineNo, colNo);
-    }
+    return makeToken(SB_TIMES, lineNo, colNo);
   }
   case CHAR_SLASH:
   {
@@ -331,16 +303,11 @@ Token *getToken(void)
     {
       return makeToken(SB_SLASH, cn, ln);
     }
-  case CHAR_RPAR:
-  {
-    readChar();
-    return makeToken(CHAR_RPAR, lineNo, colNo);
   }
-  }
-  case CHAR_SINGLEQUOTE:
-  {
-    return readConstChar();
-  }
+  // case CHAR_SINGLEQUOTE:{
+  //   readChar();
+  //   readConstChar();
+  // }
   default:
     token = makeToken(TK_NONE, lineNo, colNo);
     error(ERR_INVALIDSYMBOL, lineNo, colNo);
@@ -378,7 +345,7 @@ void printToken(Token *token)
     printf("KW_PROGRAM\n");
     break;
   case KW_CONST:
-    printf("KW_CONST[%s]\n", token->string);
+    printf("KW_CONST\n");
     break;
   case KW_TYPE:
     printf("KW_TYPE\n");
@@ -520,13 +487,12 @@ int scan(char *fileName)
 int main(int argc, char *argv[])
 {
   // Check input argc have enough file
-  if (argc <= 1)
-  {
-    printf("scanner: no input file.\n");
-    return -1;
-  }
+  // if (argc <= 1) {
+  //   printf("scanner: no input file.\n");
+  //   return -1;
+  // }
 
-  if (scan(argv[1]) == IO_ERROR)
+  if (scan("db.txt") == IO_ERROR)
   {
     printf("Can\'t read input file!\n");
     return -1;
