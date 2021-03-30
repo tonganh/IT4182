@@ -31,7 +31,8 @@ struct {
   {"WHILE", KW_WHILE},
   {"DO", KW_DO},
   {"FOR", KW_FOR},
-  {"TO", KW_TO}
+  {"TO", KW_TO},
+  {"FLOAT", KW_FLOAT}
 };
 
 int keywordEq(char *kw, char *string) {
@@ -46,7 +47,9 @@ TokenType checkKeyword(char *string) {
   int i;
   for (i = 0; i < KEYWORDS_COUNT; i++)
     if (keywordEq(keywords[i].string, string)) 
-      return keywords[i].tokenType;
+      {
+        return keywords[i].tokenType;
+      }
   return TK_NONE;
 }
 

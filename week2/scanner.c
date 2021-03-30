@@ -107,6 +107,7 @@ Token *readIdentKeyword(void)
   {
     tokenReadIdentKeyword->tokenType = TK_IDENT;
   }
+  readChar();
   return tokenReadIdentKeyword;
 }
 
@@ -115,10 +116,15 @@ Token *readNumber(void)
   Token *tokenNumber = makeToken(TK_NUMBER, lineNo, colNo);
   int i = 0;
   char convertToNumber = currentChar;
-  while ((currentChar != EOF) && (charCodes[currentChar] == CHAR_DIGIT))
+  int checkFloatExisted = 0;
+  while ((currentChar != EOF) && (charCodes[currentChar] == CHAR_DIGIT || charCodes[currentChar] == CHAR_PERIOD))
   {
     tokenNumber->string[i] = convertToNumber;
     i++;
+    if (charCodes[currentChar] == CHAR_PERIOD)
+    {
+      checkFloatExisted = 1;
+    }
     readChar();
     convertToNumber = currentChar;
   }
@@ -128,6 +134,11 @@ Token *readNumber(void)
   }
   else
   {
+    if (checkFloatExisted ==1)
+    {
+      tokenNumber->tokenType = TK_FLOAT;
+    }
+    readChar();
     return tokenNumber;
   }
 }
@@ -212,6 +223,7 @@ Token *getToken(void)
 
   case CHAR_SEMICOLON:
   {
+    printf("test in semicolon: %d %d\n", lineNo, colNo);
     token = makeToken(SB_SEMICOLON, lineNo, colNo);
     readChar();
     return token;
@@ -373,7 +385,8 @@ void printToken(Token *token)
   case TK_EOF:
     printf("TK_EOF\n");
     break;
-
+  case TK_FLOAT:
+    printf("TK_FLOAT(%s)\n", token->string);
   case KW_PROGRAM:
     printf("KW_PROGRAM\n");
     break;
@@ -434,7 +447,8 @@ void printToken(Token *token)
   case KW_TO:
     printf("KW_TO\n");
     break;
-
+  case KW_FLOAT:
+    printf("KW_FLOAT\n");
   case SB_SEMICOLON:
     printf("SB_SEMICOLON\n");
     break;
