@@ -3,7 +3,7 @@ VAR I:FLOAT;
     D:STRING;
 Begin
 I:= 1.5;
-I:= .5;
+I:= -.5;
 I:= -1.5;
 I:= 5.;
 I:= 5;

@@ -18,20 +18,20 @@ int readChar(void) {
     lineNo ++;
     colNo = 0;
   }
-  // printf("current char, value end of file: %c %d %d\n", currentChar, lineNo, colNo);
   return currentChar;
-}
+} // doc ki tu qua getc, sau moi ky tu tang so cot them 1, neu gap \n thi tang so dong, so cot ve 0
+// con tro file (inputStream) chuyen den ky tu tiep theo
+// while(getc(inputStream)) == in ca file
 
 int openInputStream(char *fileName) {
-  inputStream = fopen(fileName, "r+");
+  inputStream = fopen(fileName, "rt");
   if (inputStream == NULL)
     return IO_ERROR;
   lineNo = 1;
   colNo = 0;
   readChar();
-  printf("openInputStream\n");
   return IO_SUCCESS;
-}
+} // mo file, set so dong ve 1, so cot ve 0
 
 void closeInputStream() {
   fclose(inputStream);

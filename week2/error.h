@@ -12,7 +12,8 @@ typedef enum {
   ERR_IDENTTOOLONG,
   ERR_INVALIDCHARCONSTANT,
   ERR_INVALIDSYMBOL,
-  ERR_INVALIDNUMBER
+  ERR_INVALIDFLOAT,
+  ERR_INVALIDDOUBLEQUOTE
 } ErrorCode;
 
 
@@ -20,7 +21,9 @@ typedef enum {
 #define ERM_IDENTTOOLONG "Identification too long!"
 #define ERM_INVALIDCHARCONSTANT "Invalid const char!"
 #define ERM_INVALIDSYMBOL "Invalid symbol!"
-#define ERM_INVALIDNUMBER "Invalid number!"
+#define ERM_INVALIDFLOAT "Invalid float!"
+#define ERM_INVALIDDOUBLEQUOTE "Invalid double quotes!"
+
 void error(ErrorCode err, int lineNo, int colNo);
 
 #endif

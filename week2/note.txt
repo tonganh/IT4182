@@ -1,6 +1,0 @@
-Run file:
-make clean && make && ./scanner
-
-
-luồng chạy chương trinfh:
-scan -> đọc file -> lấy token -> chia các trường hợp -> tùy theo case sẽ chạy thêm readChar, readIdent or many things else -> print  token
