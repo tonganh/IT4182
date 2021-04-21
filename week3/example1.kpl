@@ -1,3 +1,5 @@
-Program Example1; (* Example 1 *)
+Program a1;
+Var Min: Interger;
 Begin
-End. (* Example 1 *)
+    While a > 10 min Do 
+End.

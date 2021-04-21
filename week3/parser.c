@@ -14,27 +14,21 @@
 Token *currentToken;
 Token *lookAhead;
 
-void scan(void)
-{
-  Token *tmp = currentToken;
+void scan(void) {
+  Token* tmp = currentToken;
   currentToken = lookAhead;
   lookAhead = getValidToken();
   free(tmp);
 }
 
-void eat(TokenType tokenType)
-{
-  if (lookAhead->tokenType == tokenType)
-  {
-    printToken(lookAhead);
+void eat(TokenType tokenType) {
+  if (lookAhead->tokenType == tokenType) {
+    // printToken(lookAhead);
     scan();
-  }
-  else
-    missingToken(tokenType, lookAhead->lineNo, lookAhead->colNo);
+  } else missingToken(tokenType, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileProgram(void)
-{
+void compileProgram(void) {
   assert("Parsing a Program ....");
   eat(KW_PROGRAM);
   eat(TK_IDENT);
@@ -44,131 +38,107 @@ void compileProgram(void)
   assert("Program parsed!");
 }
 
-void compileBlock(void)
-{
+void compileBlock(void) {
   assert("Parsing a Block ....");
-  if (lookAhead->tokenType == KW_CONST)
-  {
+  if (lookAhead->tokenType == KW_CONST) {
     eat(KW_CONST);
     compileConstDecl();
-    // parse multi const decl
     compileConstDecls();
     compileBlock2();
-  }
-  else
-    compileBlock2();
+  } 
+  else compileBlock2();
   assert("Block parsed!");
 }
-// passing type
-void compileBlock2(void)
-{
-  if (lookAhead->tokenType == KW_TYPE)
-  {
+
+void compileBlock2(void) {
+  if (lookAhead->tokenType == KW_TYPE) {
     eat(KW_TYPE);
     compileTypeDecl();
     compileTypeDecls();
     compileBlock3();
-  }
-  else
-    compileBlock3();
+  } 
+  else compileBlock3();
 }
-// pass vardcl
-void compileBlock3(void)
-{
-  if (lookAhead->tokenType == KW_VAR)
-  {
+
+void compileBlock3(void) {
+  if (lookAhead->tokenType == KW_VAR) {
     eat(KW_VAR);
     compileVarDecl();
     compileVarDecls();
     compileBlock4();
-  }
-  else
-    compileBlock4();
+  } 
+  else compileBlock4();
 }
-//  pass procdcl and funcdol
-void compileBlock4(void)
-{
+
+void compileBlock4(void) {
   compileSubDecls();
   compileBlock5();
 }
-// pass begin
-void compileBlock5(void)
-{
+
+void compileBlock5(void) {
   eat(KW_BEGIN);
   compileStatements();
-  // last keyword to end procedure
   eat(KW_END);
 }
 
-void compileConstDecls(void)
-{
-  while (lookAhead->tokenType == TK_IDENT)
+void compileConstDecls(void) {
+  while(lookAhead->tokenType == TK_IDENT)
   {
-    compileTypeDecl();
+    compileConstDecl();
   }
 }
 
-void compileConstDecl(void)
-{
+void compileConstDecl(void) {
   eat(TK_IDENT);
   eat(SB_EQ);
   compileConstant();
   eat(SB_SEMICOLON);
 }
 
-void compileTypeDecls(void)
-{
-  while (lookAhead->tokenType == TK_IDENT)
+void compileTypeDecls(void) {
+  while(lookAhead->tokenType == TK_IDENT)
   {
     compileTypeDecl();
   }
 }
 
-void compileTypeDecl(void)
-{
+void compileTypeDecl(void) {
   eat(TK_IDENT);
   eat(SB_EQ);
   compileType();
   eat(SB_SEMICOLON);
 }
 
-void compileVarDecls(void)
-{
-  while (lookAhead->tokenType == TK_IDENT)
+void compileVarDecls(void) {
+  while(lookAhead->tokenType == TK_IDENT)
   {
     compileVarDecl();
   }
 }
 
-void compileVarDecl(void)
-{
+void compileVarDecl(void) {
   eat(TK_IDENT);
-  eat(SB_COLON); // ':'
+  eat(SB_COLON);
   compileType();
   eat(SB_SEMICOLON);
 }
-// passing branch procdcl
-void compileSubDecls(void)
-{
-  assert("Parsing subtoutines ....");
-  // start with FUNCTION- keyword
 
-  if (lookAhead->tokenType == KW_PROCEDURE) // maybe we have function or procedure
-  {
-    compileProcDecl();
-    compileSubDecls();
-  }
-  else if (lookAhead->tokenType == KW_FUNCTION)
+void compileSubDecls(void) {
+  assert("Parsing subtoutines ....");
+  if(lookAhead->tokenType == KW_FUNCTION)
   {
     compileFuncDecl();
     compileSubDecls();
   }
-
+  else if (lookAhead->tokenType == KW_PROCEDURE)
+  {
+    compileProcDecl();
+    compileSubDecls();
+  }
   assert("Subtoutines parsed ....");
 }
 
-void compileFuncDecl(void)
-{
+void compileFuncDecl(void) {
   assert("Parsing a function ....");
   eat(KW_FUNCTION);
   eat(TK_IDENT);
@@ -176,15 +146,12 @@ void compileFuncDecl(void)
   eat(SB_COLON);
   compileBasicType();
   eat(SB_SEMICOLON);
-  // get a block
   compileBlock();
-  // end
   eat(SB_SEMICOLON);
   assert("Function parsed ....");
 }
 
-void compileProcDecl(void)
-{
+void compileProcDecl(void) {
   assert("Parsing a procedure ....");
   eat(KW_PROCEDURE);
   eat(TK_IDENT);
@@ -195,9 +162,7 @@ void compileProcDecl(void)
   assert("Procedure parsed ....");
 }
 
-void compileUnsignedConstant(void)
-{
-  // have somecase: number, ident, char. If not in this case =>have error
+void compileUnsignedConstant(void) {
   if (lookAhead->tokenType == TK_NUMBER)
   {
     eat(TK_NUMBER);
@@ -210,12 +175,13 @@ void compileUnsignedConstant(void)
   {
     eat(TK_CHAR);
   }
-  else
+  else 
+  {
     error(ERR_INVALIDCONSTANT, lookAhead->lineNo, lookAhead->colNo);
+  }
 }
 
-void compileConstant(void)
-{
+void compileConstant(void) {
   if (lookAhead->tokenType == SB_PLUS)
   {
     eat(SB_PLUS);
@@ -226,16 +192,17 @@ void compileConstant(void)
     eat(SB_MINUS);
     compileConstant2();
   }
-  else if (lookAhead->tokenType == TK_CHAR)
+  else if(lookAhead->tokenType == TK_CHAR)
   {
     eat(TK_CHAR);
   }
   else
+  {
     compileConstant2();
+  }
 }
 
-void compileConstant2(void)
-{
+void compileConstant2(void) {
   if (lookAhead->tokenType == TK_IDENT)
   {
     eat(TK_IDENT);
@@ -245,11 +212,12 @@ void compileConstant2(void)
     eat(TK_NUMBER);
   }
   else
+  {
     error(ERR_INVALIDCONSTANT, lookAhead->lineNo, lookAhead->colNo);
+  }
 }
 
-void compileType(void)
-{
+void compileType(void) {
   if (lookAhead->tokenType == KW_INTEGER)
   {
     eat(KW_INTEGER);
@@ -272,11 +240,12 @@ void compileType(void)
     compileType();
   }
   else
+  {
     error(ERR_INVALIDTYPE, lookAhead->lineNo, lookAhead->colNo);
+  }
 }
 
-void compileBasicType(void)
-{
+void compileBasicType(void) {
   if (lookAhead->tokenType == KW_INTEGER)
   {
     eat(KW_INTEGER);
@@ -286,46 +255,31 @@ void compileBasicType(void)
     eat(KW_CHAR);
   }
   else
+  {
     error(ERR_INVALIDBASICTYPE, lookAhead->lineNo, lookAhead->colNo);
+  }
 }
 
-void compileParams(void)
-{
+void compileParams(void) {
   if (lookAhead->tokenType == SB_LPAR)
   {
     eat(SB_LPAR);
     compileParam();
     compileParams2();
-    // in this case, we will have rpar ') ' -> end. finish read params in this procedure
     eat(SB_RPAR);
   }
-  else if (lookAhead->tokenType == SB_SEMICOLON)
-  {
-  }
-  else if (lookAhead->tokenType == SB_COLON)
-  {
-  }
-  else
-    error(ERR_INVALIDPARAM, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileParams2(void)
-{
+void compileParams2(void) {
   if (lookAhead->tokenType == SB_SEMICOLON)
   {
     eat(SB_SEMICOLON);
     compileParam();
     compileParams2();
   }
-  else if (lookAhead->tokenType == SB_RPAR)
-  {
-  }
-  else
-    error(ERR_INVALIDPARAM, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileParam(void)
-{
+void compileParam(void) {
   if (lookAhead->tokenType == TK_IDENT)
   {
     eat(TK_IDENT);
@@ -339,41 +293,29 @@ void compileParam(void)
     eat(SB_COLON);
     compileBasicType();
   }
-  else
-    error(ERR_INVALIDPARAM, lookAhead->lineNo, lookAhead->colNo);
+  else error(ERR_INVALIDPARAM, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileStatements(void)
-{
+void compileStatements(void) {
   compileStatement();
   compileStatements2();
 }
 
-void compileStatements2(void)
-{
+void compileStatements2(void) {
   if (lookAhead->tokenType == SB_SEMICOLON)
   {
     eat(SB_SEMICOLON);
     compileStatement();
     compileStatements2();
   }
-  else if (lookAhead->tokenType == KW_END)
-  {
-  }
-  else
-    error(ERR_INVALIDSTATEMENT, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileStatement(void)
-{
-  switch (lookAhead->tokenType)
-  {
+void compileStatement(void) {
+  switch (lookAhead->tokenType) {
   case TK_IDENT:
-    // assign
     compileAssignSt();
     break;
   case KW_CALL:
-    // procall
     compileCallSt();
     break;
   case KW_BEGIN:
@@ -400,33 +342,30 @@ void compileStatement(void)
   }
 }
 
-void compileAssignSt(void)
-{
+void compileAssignSt(void) {
   assert("Parsing an assign statement ....");
+  // read variable
   eat(TK_IDENT);
-  if (lookAhead->tokenType == SB_LSEL)
+
+  if (lookAhead->tokenType == SB_LSEL) // case: Indexes
   {
-    // in this case, assign with a element in array
     compileIndexes();
   }
+
   eat(SB_ASSIGN);
-  compileExpression();
+  compileExpression(); 
   assert("Assign statement parsed ....");
 }
 
-void compileCallSt(void)
-{
+void compileCallSt(void) {
   assert("Parsing a call statement ....");
-  // Call constrcut: KW_CALL and an ident, after that have some arguments
   eat(KW_CALL);
   eat(TK_IDENT);
   compileArguments();
   assert("Call statement parsed ....");
 }
 
-void compileGroupSt(void)
-{
-  // from file result, i understand with logic: begin, after that cal abcxyz ...
+void compileGroupSt(void) {
   assert("Parsing a group statement ....");
   eat(KW_BEGIN);
   compileStatements();
@@ -434,28 +373,24 @@ void compileGroupSt(void)
   assert("Group statement parsed ....");
 }
 
-void compileIfSt(void)
-{
+void compileIfSt(void) {
   assert("Parsing an if statement ....");
   eat(KW_IF);
   compileCondition();
   eat(KW_THEN);
   compileStatement();
-  if (lookAhead->tokenType == KW_ELSE)
+  if (lookAhead->tokenType == KW_ELSE) 
     compileElseSt();
   assert("If statement parsed ....");
 }
 
-void compileElseSt(void)
-{
+void compileElseSt(void) {
   eat(KW_ELSE);
   compileStatement();
 }
 
-void compileWhileSt(void)
-{
+void compileWhileSt(void) {
   assert("Parsing a while statement ....");
-  // constructor: while(expresssion) do{ar, experss, etc}
   eat(KW_WHILE);
   compileCondition();
   eat(KW_DO);
@@ -463,10 +398,8 @@ void compileWhileSt(void)
   assert("While statement pased ....");
 }
 
-void compileForSt(void)
-{
+void compileForSt(void) {
   assert("Parsing a for statement ....");
-  // for(variable assigned, expression, , to)
   eat(KW_FOR);
   eat(TK_IDENT);
   eat(SB_ASSIGN);
@@ -474,139 +407,108 @@ void compileForSt(void)
   eat(KW_TO);
   compileExpression();
   eat(KW_DO);
-  compileStatements();
+  compileStatement();
   assert("For statement parsed ....");
 }
 
-void compileArguments(void)
-{
-  //may be have * - + / in (). We check right now
-  if (lookAhead->tokenType == SB_LPAR)
+void compileArguments(void) {
+  switch(lookAhead->tokenType)
   {
-    eat(SB_LPAR);
-    compileExpression();
-    compileArguments2();
-    eat(SB_RPAR);
+    case SB_LPAR:
+    {
+      eat(SB_LPAR);
+      compileExpression();
+      compileArguments2();
+      eat(SB_RPAR);
+      break;
+    }
+    case SB_TIMES: 
+    case SB_SLASH:
+    case SB_PLUS:
+    case SB_MINUS:
+    case KW_DO:
+    case KW_TO:
+    case SB_RPAR:
+    case SB_EQ:
+    case SB_COMMA:
+    case SB_NEQ:
+    case SB_LE:
+    case SB_LT:
+    case SB_GE:
+    case SB_GT:
+    case SB_RSEL:
+    case SB_SEMICOLON:
+    case KW_END:
+    case KW_ELSE:
+    case KW_THEN: break;
+    default: error(ERR_INVALIDARGUMENTS, lookAhead->lineNo, lookAhead->colNo);
   }
-  // some operator
-  else if (lookAhead->tokenType == SB_TIMES)
-  {
-  }
-  else if (lookAhead->tokenType == SB_SLASH)
-  {
-  }
-  else if (lookAhead->tokenType == SB_EQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_NEQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RPAR)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RSEL)
-  {
-  }
-  else if (lookAhead->tokenType == SB_SEMICOLON)
-  {
-  }
-  else if (lookAhead->tokenType == SB_COMMA)
-  {
-  }
-  else if (lookAhead->tokenType == KW_THEN)
-  {
-  }
-  else if (lookAhead->tokenType == KW_ELSE)
-  {
-  }
-  else if (lookAhead->tokenType == KW_TO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_DO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_END)
-  {
-  }
-  else
-    error(ERR_INVALIDARGUMENTS, lookAhead->lineNo, lookAhead->colNo);
 }
-// we passing in function
-void compileArguments2(void)
-{
+
+void compileArguments2(void) {
   if (lookAhead->tokenType == SB_COMMA)
   {
     eat(SB_COMMA);
     compileExpression();
     compileArguments2();
-  } // close argument for function
-  else if (lookAhead->tokenType == SB_RPAR)
-  {
   }
-  // throw exception
+  else if (lookAhead->tokenType == SB_RPAR) {}
   else
   {
     error(ERR_INVALIDARGUMENTS, lookAhead->lineNo, lookAhead->colNo);
   }
 }
 
-void compileCondition(void)
-{
-  // have come conditions: equal, less then, greate then, neq, lte or gte
+void compileCondition(void) {
   compileExpression();
   compileCondition2();
 }
 
-void compileCondition2(void)
-{
-  if (lookAhead->tokenType == SB_EQ)
+void compileCondition2(void) {
+  switch(lookAhead->tokenType)
   {
-    eat(SB_EQ);
-    compileExpression();
+    case SB_EQ: 
+    {
+      eat(SB_EQ);
+      compileExpression();
+      break;
+    }
+    case SB_NEQ:
+    {
+      eat(SB_NEQ);
+      compileExpression();
+      break;
+    }
+    case SB_LE:
+    {
+      eat(SB_LE);
+      compileExpression();
+      break;
+    }
+    case SB_LT:
+    {
+      eat(SB_LT);
+      compileExpression();
+      break;
+    }
+    case SB_GE:
+    {
+      eat(SB_GE);
+      compileExpression();
+      break;
+    }
+    case SB_GT:
+    {
+      eat(SB_GT);
+      compileExpression();
+      break;
+    }
+    default: error(ERR_INVALIDCOMPARATOR, lookAhead->lineNo, lookAhead->colNo);
   }
-  else if (lookAhead->tokenType == SB_LT)
-  {
-    eat(SB_LT);
-    compileExpression();
-  }
-  else if (lookAhead->tokenType == SB_GT)
-  {
-    eat(SB_GT);
-    compileExpression();
-  }
-  else if (lookAhead->tokenType == SB_NEQ)
-  {
-    eat(SB_NEQ);
-    compileExpression();
-  }
-  else if (lookAhead->tokenType == SB_LE)
-  {
-    eat(SB_LE);
-    compileExpression();
-  }
-  else if (lookAhead->tokenType == SB_GE)
-  {
-    eat(SB_GE);
-    compileExpression();
-  }
-  else
-    error(ERR_INVALIDCOMPARATOR, lookAhead->lineNo, lookAhead->colNo);
+
 }
 
-void compileExpression(void)
-{
+void compileExpression(void) {
   assert("Parsing an expression");
   if (lookAhead->tokenType == SB_PLUS)
   {
@@ -618,221 +520,136 @@ void compileExpression(void)
     eat(SB_MINUS);
     compileExpression2();
   }
-  else
-    compileExpression2();
+  else compileExpression2();
   assert("Expression parsed");
 }
 
-void compileExpression2(void)
-{
+void compileExpression2(void) {
   compileTerm();
-  // now check to branch conditions (after checkout term)
   compileExpression3();
 }
-// term have two type: plus or minus, after all term we will conpile factor. flow: term -> factor
-void compileExpression3(void)
-{
-  if (lookAhead->tokenType == SB_PLUS)
+
+
+void compileExpression3(void) {
+  switch(lookAhead->tokenType)
   {
-    eat(SB_PLUS);
-    compileTerm();
-    compileExpression3();
+    case SB_PLUS:
+    {
+      eat(SB_PLUS);
+      compileTerm();
+      compileExpression3();
+      break;
+    }
+    case SB_MINUS:
+    {
+      eat(SB_MINUS);
+      compileTerm();
+      compileExpression3();
+      break;
+    }
+    case SB_LE:
+    case SB_LT:
+    case SB_GE:
+    case SB_GT:
+    case SB_RSEL:
+    case KW_TO:
+    case KW_DO:
+    case SB_EQ:
+    case SB_NEQ:
+    case SB_RPAR:
+    case SB_COMMA:
+    case SB_SEMICOLON:
+    case KW_END:
+    case KW_ELSE:
+    case KW_THEN: break;
+    default: error(ERR_INVALIDEXPRESSION, lookAhead->lineNo, lookAhead->colNo);
   }
-  else if (lookAhead->tokenType == SB_MINUS)
-  {
-    eat(SB_MINUS);
-    compileTerm();
-    compileExpression3();
-  }
-  else if (lookAhead->tokenType == SB_EQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_NEQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RPAR)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RSEL)
-  {
-  }
-  else if (lookAhead->tokenType == SB_SEMICOLON)
-  {
-  }
-  else if (lookAhead->tokenType == SB_COMMA)
-  {
-  }
-  else if (lookAhead->tokenType == KW_THEN)
-  {
-  }
-  else if (lookAhead->tokenType == KW_ELSE)
-  {
-  }
-  else if (lookAhead->tokenType == KW_TO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_DO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_END)
-  {
-  }
-  else
-    error(ERR_INVALIDEXPRESSION, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileTerm(void)
-{
+void compileTerm(void) {
   compileFactor();
   compileTerm2();
 }
 
-void compileTerm2(void)
-{
-  // have two case we will recheck term(* and \)
-  if (lookAhead->tokenType == SB_TIMES)
+void compileTerm2(void) {
+  switch(lookAhead->tokenType)
   {
-    eat(SB_TIMES);
-    compileFactor();
-    compileTerm2();
+    case SB_TIMES:
+    {
+      eat(SB_TIMES);
+      compileFactor();
+      compileTerm2();
+      break;
+    }
+    case SB_SLASH:
+    {
+      eat(SB_SLASH);
+      compileFactor();
+      compileTerm2();
+      break;
+    }
+    case SB_MINUS:
+    case SB_PLUS:
+    case SB_EQ:
+    case SB_NEQ:
+    case SB_LE:
+    case SB_LT:
+    case SB_GE:
+    case SB_GT:
+    case SB_RPAR:
+    case SB_RSEL:
+    case SB_SEMICOLON:
+    case SB_COMMA:
+    case KW_THEN:
+    case KW_ELSE:
+    case KW_TO:
+    case KW_DO:
+    case KW_END: break;
+    default: error(ERR_INVALIDTERM, lookAhead->lineNo, lookAhead->colNo);
   }
-  else if (lookAhead->tokenType == SB_SLASH)
-  {
-    eat(SB_SLASH);
-    compileFactor();
-    compileTerm2();
-  }
-  // have some case is operator but not check again factor.
-  else if (lookAhead->tokenType == SB_MINUS)
-  {
-  }
-  else if (lookAhead->tokenType == SB_PLUS)
-  {
-  }
-  else if (lookAhead->tokenType == SB_EQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_NEQ)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_LT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GE)
-  {
-  }
-  else if (lookAhead->tokenType == SB_GT)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RPAR)
-  {
-  }
-  else if (lookAhead->tokenType == SB_RSEL)
-  {
-  }
-  else if (lookAhead->tokenType == SB_SEMICOLON)
-  {
-  }
-  else if (lookAhead->tokenType == SB_COMMA)
-  {
-  }
-  else if (lookAhead->tokenType == KW_THEN)
-  {
-  }
-  else if (lookAhead->tokenType == KW_ELSE)
-  {
-  }
-  else if (lookAhead->tokenType == KW_TO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_DO)
-  {
-  }
-  else if (lookAhead->tokenType == KW_END)
-  {
-  }
-  else
-    error(ERR_INVALIDTERM, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileFactor(void)
-{
-  // in factor we have 4 case: unsigned constant, variable, function(like ident but have params(maybe)), and just have (express)
-  // 1, unsigned constant: you get character
+void compileFactor(void) {
   if (lookAhead->tokenType == TK_CHAR)
   {
     compileUnsignedConstant();
-  } // 2,
+  }
   else if (lookAhead->tokenType == TK_NUMBER)
   {
     eat(TK_NUMBER);
-  } //ex funcdl not get: tna(int x1);
+  }
   else if (lookAhead->tokenType == TK_IDENT)
   {
     eat(TK_IDENT);
-    //this maybe (. .) <=> []; or have some arguments : (int x1, x2)
-    if (lookAhead->tokenType == SB_LPAR)
-    {
-      compileArguments();
-    }
-    else if (lookAhead->tokenType == SB_LSEL)
+    if (lookAhead->tokenType == SB_LSEL)
     {
       compileIndexes();
     }
+    else if (lookAhead->tokenType == SB_LPAR)
+    {
+      compileArguments();
+    }
   }
-  else
-    error(ERR_INVALIDFACTOR, lookAhead->lineNo, lookAhead->colNo);
-
-  // if (lookAhead->tokenType == SB_LPAR) {
-  //   eat(SB_LPAR);
-  //   compileExpression();
-  //   eat(SB_RPAR);
-  // }
-  // else if (lookAhead->tokenType == TK_NUMBER) eat(TK_NUMBER);
-  // else if (lookAhead->tokenType == TK_CHAR)
-  //   compileUnsignedConstant();
-  // else if (lookAhead->tokenType == TK_IDENT) {
-  //   eat(TK_IDENT);
-  //   if (lookAhead->tokenType == SB_LPAR) {
-  //     compileArguments();
-  //   }
-  //   else if (lookAhead->tokenType == SB_LSEL) {
-  //     compileIndexes();
-  //   }
-  // }
-  // else error(ERR_INVALIDFACTOR, lookAhead->lineNo, lookAhead->colNo);
+  else if (lookAhead->tokenType == SB_LPAR)
+  {
+    eat(SB_LPAR);
+    compileExpression();
+    eat(SB_RPAR);
+  }
+  else error(ERR_INVALIDFACTOR, lookAhead->lineNo, lookAhead->colNo);
 }
 
-void compileIndexes(void)
-{
-  // passing a strng start with '('
+void compileIndexes(void) {
   if (lookAhead->tokenType == SB_LSEL)
   {
     eat(SB_LSEL);
     compileExpression();
-    // close, type : []
     eat(SB_RSEL);
     compileIndexes();
   }
 }
 
-int compile(char *fileName)
-{
+int compile(char *fileName) {
   if (openInputStream(fileName) == IO_ERROR)
     return IO_ERROR;
 
@@ -845,4 +662,5 @@ int compile(char *fileName)
   free(lookAhead);
   closeInputStream();
   return IO_SUCCESS;
+
 }
