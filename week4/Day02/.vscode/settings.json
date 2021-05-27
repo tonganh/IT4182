@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "scanner.h": "c",
+        "parser.h": "c",
+        "error.h": "c",
+        "debug.h": "c"
+    }
+}
