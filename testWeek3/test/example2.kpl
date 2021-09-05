@@ -1,0 +1,26 @@
+Program Example2; (* Factorial *)
+   
+Var n, a, b, c : Integer;
+
+Function F(n : Integer) : Integer;
+  Begin
+    Do
+      Begin
+        x := 6 + 7;
+        y := x*2 - 5
+      End
+    While (x > 1);
+    (x,y,z) := (x + 5, y + 6, d + 7);
+    A(.1,2,3,4.)(.3+t.) := C(.4,10,12.);
+    B(.1.)(.a+5.)(.v.) := 7;
+    x := (5 + 6);
+    If (n = 0) Then F := 1 Else F := N * F (N - 1);
+  End;
+
+Begin
+  For n := 1 To 7 Do
+    Begin
+      Call WriteLn;
+      Call WriteI( F(i));
+    End;
+End. (* Factorial *)

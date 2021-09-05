@@ -1,0 +1,45 @@
+C. Phân tích ngữ nghĩa
+
+1.
+
+** checkFreshIdent: kiểm tra ident có hợp lệ không, 1 ident hợp lệ nếu chưa được khai báo trong phạm vi hiện tại
+** checkDeclareIdent(): kiểm tra ident đã được khai báo chưa. Nếu ident đã được khai báo => trả về Object*, còn không trả về NULL
+** checkDecalreLValueIdent(): kiểm tra object đã được khai báo hay chưa, thuộc 1 trong các kiểu: variable - parameter- function .Nếu ident chưa được khai báo/ không trong phạm vi hiện tại / không thuộc 1 trong các kiểu dữ liệu kể trene => báo lỗi
+
+2. biểu diễn chương trình: 
+
+Program Toto
+    Const Max = 10
+    Type Vector = Arr(10, Int)
+    Procedure Foo
+        Param Var a: Int
+        Var M: Arr(10, Arr(10,Int))
+        Var b: Int
+
+
+B
+    1.
+
+    2.
+
+void supportForBlock3(void){
+  eat(TK_IDENT);
+  if (lookAhead->tokenType == SB_EQ)
+  {
+    eat(SB_EQ);
+    eat(TK_NUMBER);
+  }
+}
+
+void compileBlock3(void){
+  eat(KW_VAR);
+  supportForBlock3();
+  while (lookAhead->tokenType == SB_COMMA)
+  {
+    eat(SB_COMMA);    
+    supportForBlock3();
+  }
+  eat(SB_COLON);
+  compileType();
+  eat(SB_SEMICOLON);
+}
